@@ -6,4 +6,4 @@ WORKDIR /src
 
 RUN go build .
 
-CMD [ "go-service" ]
+CMD [ "./go-service" ]
