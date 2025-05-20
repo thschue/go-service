@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Database Status Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      font-family: system-ui, sans-serif;
+      background: #f9fafb;
+      color: #111827;
+    }
+    body {
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      padding: 2rem 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    .status {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+    .status.connected {
+      color: #16a34a; /* green */
+    }
+    .status.disconnected {
+      color: #dc2626; /* red */
+    }
+    .timestamp {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Database Connection Status</h1>
+    <p class="status {{ if eq .Status "Connected" }}connected{{ else }}disconnected{{ end }}">
+      {{ .Status }}
+    </p>
+    <p class="timestamp">Checked at: {{ .Timestamp }}</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: DB Status API
+  description: API for checking the database connectivity status
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8081/api
+paths:
+  /status:
+    get:
+      summary: Get database connection status
+      operationId: getStatus
+      responses:
+        '200':
+          description: Current DB status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+components:
+  schemas:
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: Connected
+        timestamp:
+          type: string
+          format: date-time
+          example: 2025-05-19T14:53:00Z

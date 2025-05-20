@@ -63,6 +63,9 @@ jobs:
     name: Build Container Image
     needs: prepare_ci_run
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        component: [ "frontend", "backend" ]
     env:
       BRANCH: ${{ needs.prepare_ci_run.outputs.BRANCH }}
       DATETIME: ${{ needs.prepare_ci_run.outputs.DATETIME }}
@@ -82,25 +85,25 @@ jobs:
         with:
           context: .
           platforms: linux/amd64
-          file: ./Dockerfile
+          file: ./${{ matrix.component }}/Dockerfile
           target: production
           tags: |
-            ${{ env.RELEASE_REGISTRY }}/${{ env.IMAGE_NAME }}:dev-${{ env.DATETIME }}
+            ${{ env.RELEASE_REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.component }}:dev-${{ env.DATETIME }}
           build-args: |
             GIT_HASH=${{ env.GIT_SHA }}
             RELEASE_VERSION=dev-${{ env.DATETIME }}
             BUILD_TIME=${{ env.BUILD_TIME }}
           builder: ${{ steps.buildx.outputs.name }}
           push: false
-          cache-from: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE_NAME }}
-          cache-to: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE_NAME }}
-          outputs: type=docker,dest=/tmp/${{ env.IMAGE_NAME }}-image.tar
+          cache-from: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE_NAME }}-${{ matrix.component }}
+          cache-to: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE_NAME }}-${{ matrix.component }}
+          outputs: type=docker,dest=/tmp/${{ env.IMAGE_NAME }}-${{ matrix.component }}-image.tar
 
       - name: Upload image as artifact
         uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4
         with:
-          name: ${{ env.IMAGE_NAME }}-image.tar
-          path: /tmp/${{ env.IMAGE_NAME }}-image.tar
+          name: ${{ env.IMAGE_NAME }}-${{ matrix.component }}-image.tar
+          path: /tmp/${{ env.IMAGE_NAME }}-${{ matrix.component }}-image.tar
 
   upload_images:
     name: Upload images to ghcr registry
@@ -133,16 +136,16 @@ jobs:
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5
         with:
           context: .
-          file: ./Dockerfile
+          file: ./${{ matrix.component }}/Dockerfile
           platforms: linux/amd64
           target: production
           tags: |
-            ghcr.io/thschue/${{ env.IMAGE_NAME }}:dev-${{ env.DATETIME }}
+            ghcr.io/thschue/${{ env.IMAGE_NAME }}-${{ matrix.component }}:dev-${{ env.DATETIME }}
           build-args: |
             GIT_HASH=${{ env.GIT_SHA }}
             RELEASE_VERSION=dev-${{ env.DATETIME }}
             BUILD_TIME=${{ env.BUILD_TIME }}
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          cache-from: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE_NAME }}
-          cache-to: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE_NAME }}
+          cache-from: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE_NAME }}-${{ matrix.component }}
+          cache-to: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE_NAME }}-${{ matrix.component }}
